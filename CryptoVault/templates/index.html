@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault - Secure Crypto Wallet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; }
+        header { background-color: #1a1a2e; color: #fff; padding: 1rem 0; position: fixed; width: 100%; top: 0; z-index: 1000; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+        .logo { font-size: 1.5rem; font-weight: bold; }
+        nav { display: flex; justify-content: space-between; align-items: center; }
+        nav ul { list-style: none; display: flex; align-items: center; }
+        nav ul li { margin-left: 1.5rem; }
+        nav ul li a { color: #fff; text-decoration: none; font-weight: bold; }
+        nav ul li a:hover { color: #00ff99; }
+        .hero { background-color: #16213e; color: #fff; text-align: center; padding: 8rem 0 6rem; margin-top: 4rem; }
+        .hero h1 { font-size: 2.8rem; margin-bottom: 1rem; }
+        .hero p { font-size: 1.3rem; margin-bottom: 2rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .btn { background-color: #00ff99; color: #1a1a2e; padding: 1rem 2rem; text-decoration: none; font-weight: bold; border-radius: 5px; font-size: 1.1rem; }
+        .btn:hover { background-color: #00cc7a; }
+        .flash { padding: 1rem; margin: 1rem auto; max-width: 800px; border-radius: 5px; }
+        .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        footer { background-color: #1a1a2e; color: #fff; text-align: center; padding: 2rem 0; margin-top: 4rem; }
+        @media (max-width: 768px) { nav ul { flex-direction: column; } nav ul li { margin: 0.5rem 0; } .hero h1 { font-size: 2.2rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">CryptoVault</div>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                    {% if session.user %}
+                        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ url_for('logout') }}">Logout ({{ session.user }})</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <section class="hero">
+        <div class="container">
+            <h1>Secure Your Digital Assets with CryptoVault</h1>
+            <p>The most reliable and user-friendly crypto wallet for managing Bitcoin, Ethereum, and hundreds of other cryptocurrencies.</p>
+            <a href="{{ url_for('login') }}" class="btn">Get Started</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 CryptoVault. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

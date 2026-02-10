@@ -1,0 +1,4 @@
+user_id|name|balance
+123|Alice Johnson|5000.00
+456|Bob Smith|2500.00
+789|Charlie Lee|10000.00

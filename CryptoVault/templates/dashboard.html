@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - CryptoVault</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+    header { background: #1e293b; padding: 1rem 0; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.8rem; font-weight: 700; }
+    .logo span { color: #10b981; }
+    nav a { color: #e2e8f0; text-decoration: none; margin-left: 2rem; font-weight: 500; }
+    nav a:hover { color: #10b981; }
+    main { padding-top: 100px; }
+    .dashboard { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    .welcome-card { background: #1e293b; padding: 2.5rem; border-radius: 12px; text-align: center; margin-bottom: 2rem; box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+    .balance { font-size: 3.5rem; font-weight: 700; color: #10b981; margin: 1rem 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+    .card { background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+    .card h3 { color: #10b981; margin-bottom: 1rem; }
+    .btn { background: #10b981; color: #0f172a; padding: 1rem 2rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1.1rem; transition: 0.3s; margin-top: 1rem; }
+    .btn:hover { background: #059669; transform: translateY(-2px); }
+    .transfer-form { background: #1e293b; padding: 2.5rem; border-radius: 12px; display: none; }
+    .form-group { margin-bottom: 1.5rem; }
+    label { display: block; margin-bottom: 0.6rem; font-weight: 600; color: #cbd5e1; }
+    input, select { width: 100%; padding: 1rem; background: #334155; border: none; border-radius: 8px; color: white; font-size: 1rem; }
+    #message { padding: 1.2rem; border-radius: 10px; margin: 2rem 0; text-align: center; font-weight: bold; font-size: 1.2rem; }
+    .success { background: rgba(16, 185, 129, 0.25); color: #10b981; border: 1px solid #10b981; }
+    .error { background: rgba(239, 68, 68, 0.25); color: #ef4444; border: 1px solid #ef4444; }
+    footer { text-align: center; padding: 3rem 0; color: #64748b; font-size: 0.9rem; margin-top: 4rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <div class="logo">Crypto<span>Vault</span></div>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/logout">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="dashboard">
+      <div class="welcome-card">
+        <h1>Welcome back, {{ user.name }}</h1>
+        <div class="balance">${{ "%.2f"|format(user.balance) }}</div>
+        <p>Your total portfolio value</p>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Quick Actions</h3>
+          <button class="btn" onclick="document.getElementById('transferForm').style.display='block'">Transfer Money</button>
+          <button class="btn" onclick="alert('Password change feature coming in Phase 3')">Change Password</button>
+        </div>
+
+        <div class="card">
+          <h3>Recent Activity</h3>
+          <p>No transactions yet. Make your first transfer!</p>
+        </div>
+      </div>
+
+      <div id="transferForm" class="transfer-form">
+        <h2>Transfer Money</h2>
+        <div class="form-group">
+          <label>Select Cryptocurrency</label>
+          <select id="currency">
+            <option>USDT</option>
+            <option>BTC</option>
+            <option>ETH</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Amount</label>
+          <input type="number" id="amount" placeholder="0.00" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>Recipient Wallet Address</label>
+          <input type="text" id="address" placeholder="e.g. 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" required>
+        </div>
+        <button class="btn" onclick="performTransfer()">Send Transaction</button>
+        <button class="btn" style="background:#64748b;" onclick="document.getElementById('transferForm').style.display='none'">Cancel</button>
+      </div>
+
+      <div id="message" style="display:none;"></div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 CryptoVault • Protected by AACL (Artificial Adaptive Communication Language)</p>
+  </footer>
+
+  <script src="/static/aacl-sdk.js"></script>
+
+  <script>
+    function showMessage(text, type) {
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.className = type;
+      msg.style.display = "block";
+      setTimeout(() => msg.style.display = "none", 6000);
+    }
+
+    async function performTransfer() {
+  const currency = document.getElementById('currency').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  const address = document.getElementById('address').value.trim();
+
+  if (!amount || amount <= 0 || !address) {
+    showMessage("Please fill all fields correctly", "error");
+    return;
+  }
+
+  try {
+    // Fetch fresh grammar (this must succeed)
+    const issueRes = await fetch('/aacl/issue/TRANSFER_MONEY', {
+      method: 'POST',
+      credentials: 'include'
+    });
+
+    if (!issueRes.ok) {
+      throw new Error(`Grammar fetch failed: ${issueRes.status}`);
+    }
+
+    const grammar = await issueRes.json();
+
+    // Build payload with ALL required keys explicitly
+    const payload = {
+      intent: grammar.intent,
+      state: grammar.state,           // ← This was missing or not passed
+      entropy: grammar.entropy,
+      recipient_id: address,
+      amount: amount,
+      memo: currency + " transfer"    // Optional
+    };
+
+    const body = { grammar_id: grammar.grammar_id, payload: payload };
+
+    // Send to execute
+    const execRes = await fetch('/aacl/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      credentials: 'include'
+    });
+
+    const data = await execRes.json();
+
+    showMessage(data.message, data.status === "ACTION_EXECUTED" ? "success" : "error");
+
+    if (data.status === "ACTION_EXECUTED") {
+      setTimeout(() => location.reload(), 2000); // Refresh to show updated balance
+    }
+  } catch (err) {
+    showMessage("Transfer failed: " + err.message, "error");
+  }
+}
+  </script>
+</body>
+</html>
