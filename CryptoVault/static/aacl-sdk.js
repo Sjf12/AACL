@@ -1,5 +1,5 @@
 // aacl-sdk.js - Phase 3 Client-Side AACL SDK
-// Include in HTML: <script src="/static/aacl-sdk.js"></script>
+
 
 const AACL = (function () {
   let currentGrammar = null;
@@ -87,4 +87,5 @@ const AACL = (function () {
   }
 
   return { send };
+
 })();
