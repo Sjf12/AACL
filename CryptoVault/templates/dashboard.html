@@ -117,7 +117,7 @@
   }
 
   try {
-    // Fetch fresh grammar (this must succeed)
+    // Fetch fresh grammar 
     const issueRes = await fetch('/aacl/issue/TRANSFER_MONEY', {
       method: 'POST',
       credentials: 'include'
@@ -129,19 +129,19 @@
 
     const grammar = await issueRes.json();
 
-    // Build payload with ALL required keys explicitly
+    
     const payload = {
       intent: grammar.intent,
-      state: grammar.state,           // ← This was missing or not passed
+      state: grammar.state,           
       entropy: grammar.entropy,
       recipient_id: address,
       amount: amount,
-      memo: currency + " transfer"    // Optional
+      memo: currency + " transfer"    
     };
 
     const body = { grammar_id: grammar.grammar_id, payload: payload };
 
-    // Send to execute
+    
     const execRes = await fetch('/aacl/execute', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -154,7 +154,7 @@
     showMessage(data.message, data.status === "ACTION_EXECUTED" ? "success" : "error");
 
     if (data.status === "ACTION_EXECUTED") {
-      setTimeout(() => location.reload(), 2000); // Refresh to show updated balance
+      setTimeout(() => location.reload(), 2000); 
     }
   } catch (err) {
     showMessage("Transfer failed: " + err.message, "error");
@@ -162,4 +162,5 @@
 }
   </script>
 </body>
+
 </html>
