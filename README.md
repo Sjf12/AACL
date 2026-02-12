@@ -42,6 +42,14 @@ A request `r` is valid iff:
 If any condition fails, the request is rejected before business logic execution.
 
 ---
+## 🏗 Starting CryptoVault
+
+1. **Firstly, make sure to install flask python package. If not then use pip3 install flask / pip install flask**
+2. **Start the server using the following command:
+   - cd CryptoVault && python3 app.py
+3. Then access the website in the following URL: http://loclahost:8000
+
+---
 
 ## 🏗 Architecture
 
