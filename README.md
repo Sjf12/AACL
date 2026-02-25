@@ -4,6 +4,8 @@ AACL (Artificial Adaptive Control Language) is a language-theoretic state-transi
 
 Instead of validating only authentication tokens or headers, AACL treats every sensitive request as a sentence in a server-issued, single-use grammar. Requests are validated using deterministic finite automata (DFA) before reaching application business logic.
 
+Note: This sample website is progress and is not implemented based in AACL model full fledgedly.
+
 ---
 
 ## 🚀 Motivation
