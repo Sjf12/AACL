@@ -50,6 +50,7 @@ If any condition fails, the request is rejected before business logic execution.
 2. **Start the server using the following command:
    - cd Prototype && python3 app-new.py
 3. Then access the website in the following URL: http://loclahost:5000
+4. Login with as a user. Ex- alice/alice123 or bob/bob123
 
 ---
 
