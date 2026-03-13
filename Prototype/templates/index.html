@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AACL Prototype - Official SDK Demo</title>
+    <script src="{{ url_for('static', filename='sdk.js') }}"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-xl mx-auto space-y-6">
+
+        <!-- Auth Panel -->
+        <div id="auth-panel" class="bg-white rounded-3xl shadow-xl p-8">
+            <h1 class="text-3xl font-bold text-center mb-1">AACL Prototype</h1>
+            <p class="text-center text-gray-500 text-sm mb-6">Login to begin</p>
+
+            <div class="space-y-3">
+                <input id="username" type="text" placeholder="Username (e.g. alice)"
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <input id="password" type="password" placeholder="Password (e.g. alice123)"
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <button onclick="login()"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold">
+                    Login
+                </button>
+            </div>
+
+            <div id="auth-result" class="mt-4 text-center text-sm font-medium"></div>
+        </div>
+
+        <!-- Transfer Panel (hidden until logged in) -->
+        <div id="transfer-panel" class="bg-white rounded-3xl shadow-xl p-8 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <p class="text-lg font-semibold" id="welcome-msg">Welcome!</p>
+                    <p class="text-sm text-gray-500">Balance: <span id="balance-display" class="font-bold text-green-600"></span></p>
+                </div>
+                <button onclick="logout()"
+                    class="text-sm text-red-500 hover:underline">Logout</button>
+            </div>
+
+            <div class="space-y-3 mb-6">
+                <select id="recipient" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="user-123">user-123</option>
+                    <option value="user-456">user-456</option>
+                    <option value="merchant-001">merchant-001</option>
+                </select>
+                <input id="amount" type="number" placeholder="Amount"
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+
+            <button onclick="runTransfer()"
+                class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl text-lg font-semibold">
+                Issue Grammar + Submit Transfer
+            </button>
+
+            <div id="result" class="mt-6 p-5 bg-gray-900 text-green-400 font-mono rounded-2xl min-h-[100px] text-sm whitespace-pre-wrap"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // ── Check session on page load ──────────────────────
+        window.addEventListener('load', async () => {
+            const res = await fetch('/auth/status');
+            const data = await res.json();
+            if (data.authenticated) {
+                showTransferPanel(data.username, data.balance);
+            }
+        });
+
+        // ── Login ───────────────────────────────────────────
+        async function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const authResult = document.getElementById('auth-result');
+
+            if (!username || !password) {
+                authResult.textContent = '⚠️ Please enter username and password.';
+                authResult.className = 'mt-4 text-center text-sm font-medium text-yellow-600';
+                return;
+            }
+
+            const res = await fetch('/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                authResult.textContent = '';
+                showTransferPanel(data.username || username, data.balance);
+            } else {
+                authResult.textContent = `❌ ${data.error}`;
+                authResult.className = 'mt-4 text-center text-sm font-medium text-red-500';
+            }
+        }
+
+        // ── Logout ──────────────────────────────────────────
+        async function logout() {
+            await fetch('/auth/logout', { method: 'POST' });
+            document.getElementById('transfer-panel').classList.add('hidden');
+            document.getElementById('auth-panel').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('result').textContent = '';
+        }
+
+        // ── Show transfer panel ─────────────────────────────
+        function showTransferPanel(username, balance) {
+            document.getElementById('auth-panel').classList.add('hidden');
+            document.getElementById('transfer-panel').classList.remove('hidden');
+            document.getElementById('welcome-msg').textContent = `Welcome, ${username}!`;
+            document.getElementById('balance-display').textContent = `₹${balance}`;
+            // Pre-fill amount with balance
+            document.getElementById('amount').value = '';
+        }
+
+        // ── Run Transfer via AACL SDK ───────────────────────
+        async function runTransfer() {
+            const div = document.getElementById('result');
+            const recipient = document.getElementById('recipient').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (!recipient || isNaN(amount)) {
+                div.textContent = '⚠️ Please fill in recipient and amount.';
+                return;
+            }
+
+            div.textContent = '[AACL] Issuing ephemeral grammar...';
+
+            const res = await AACL_SDK.submit('transfer', {
+                recipient_id: recipient,
+                amount: amount
+            });
+
+            if (res.success) {
+                div.textContent = `✅ ${res.message}\n💰 Remaining balance: ₹${res.remaining_balance}`;
+                div.className = 'mt-6 p-5 bg-gray-900 text-green-400 font-mono rounded-2xl min-h-[100px] text-sm whitespace-pre-wrap';
+                document.getElementById('balance-display').textContent = `₹${res.remaining_balance}`;
+                document.getElementById('balance-display').textContent = `₹${res.remaining_balance}`;
+            } else {
+                div.textContent = `❌ ${res.error}`;
+                div.className = 'mt-6 p-5 bg-gray-900 text-red-400 font-mono rounded-2xl min-h-[100px] text-sm whitespace-pre-wrap';
+            }
+        }
+
+        // Allow Enter key on password field
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('password')?.addEventListener('keydown', e => {
+                if (e.key === 'Enter') login();
+            });
+        });
+    </script>
+</body>
+</html>
