@@ -4,7 +4,11 @@ AACL (Artificial Adaptive Control Language) is a language-theoretic state-transi
 
 Instead of validating only authentication tokens or headers, AACL treats every sensitive request as a sentence in a server-issued, single-use grammar. Requests are validated using deterministic finite automata (DFA) before reaching application business logic.
 
-Note: This sample website is in-progress and is not implemented based on AACL model full fledgedly.
+**Note:** The prototype described herein is realized with AI-assisted tooling (Claude, Anthropic) for code generation and evaluation scripting, as disclosed in Section 11. The author's primary contributions are the conceptual framework, formal model, and security analysis. The prototype serves as a proof-of-concept demonstration of the theoretical acceptance condition rather than a production-ready implementation.
+
+Specifically, the DFA acceptance condition is realized in the prototype as key-set equality — a tractable and sufficient enforcement mechanism for JSON-based API payloads, as stated in the abstract. Full DFA/NFA-based parsing for richer grammar expressiveness remains an avenue for future work.
+
+This work has not undergone formal peer review. The formal model, security properties, and empirical measurements are presented to invite scrutiny, collaboration, and extension — particularly toward agentic AI security, MCP-layer enforcement, and Intent Lattice Architecture.
 
 ---
 
